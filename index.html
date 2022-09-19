@@ -1,25 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="Denisse Orellana">
-  <meta name="description" content="Giphy APIs">
-  <meta name="keywords" content="Giphy, api, local storage, javaScript, js">
-  <link rel="stylesheet" href="./assets/css/main.css">
-  <title>Giphy App</title>
-</head>
-<body>
-  <header>
-    <h1>Giphy Explorer</h1>
-  </header>
-  <main>
-    <form id="form">
-      <input id="input" type="text">
-    </form>
-    <button>Log In</button>
-  </main>
-  <script src="./assets/js/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Denisse Orellana">
+    <meta name="description" content="Giphy APIs">
+    <meta name="keywords" content="Giphy API, local storage, javaScript, js">
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <script src="https://kit.fontawesome.com/04a5b6ed04.js" crossorigin="anonymous"></script>
+    <link rel="shortcut icon" href="./assets/images/favicon.ico" type="image/x-icon">
+    <title>Giphy App</title>
+  </head>
+  <body>
+    <header>
+      <h1>Giphy Explorer</h1>
+    </header>
+    <main>
+      <section id="section__form">
+        <form id="form">
+          <div id="div-input">
+            <input 
+            id="input" 
+            type="text"
+            placeholder="Enter your search"
+            >
+          </div>
+        </form>
+        <button type="submit">Log In</button>
+      </section>
+      <section id="error-message"></section>
+      <section id="main__history">
+        <h2 id="history-title"></h2>
+        <div id="history" class="history"></div>
+      </section>
+      <section id="main__section"></section>
+    </main>
+    <script src="./assets/js/main.js"></script>
+  </body>
 </html>
