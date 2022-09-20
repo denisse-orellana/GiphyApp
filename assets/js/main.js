@@ -1,15 +1,18 @@
 const form = document.querySelector('#form');
 const input = document.querySelector('#input');
 const button = document.querySelector('#search');
+const btnSearch = document.querySelector("#btn-search");
 const message = document.querySelector('#error__message');
 const history = document.querySelector('#history');
 const h2 = document.querySelector('#history__title');
+let limit = 6;
 let offSet = 0;
 
 const baseUrl = `https://api.giphy.com/v1/gifs`
 const apiKey = "ctrj4Sw8vwEJqQaiXS5LRX2i1ssf8pj8";
-const urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=6&offset=${offSet}&rating=g`;
+const urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
 const errorGiphy = "https://media0.giphy.com/media/JsE9qckiYyVClQ5bY2/giphy.gif?cid=790b7611eebfc64d468ef60c14903e5f82dd73b4856f6cf8&rid=giphy.gif&ct=g";
+const errorFetch = "./assets/images/server_error_500.svg"
 
 const addCard = (alt, image) => {
   // console.log(alt, image);
@@ -38,11 +41,11 @@ const getImage = async(array) => {
   }
 }
 
-const errorMessage = (message) => {
+const errorMessage = (message, image) => {
   const figure = document.createElement("figure");
   figure.className = "card-error"
   const img = document.createElement("img");
-  img.src = errorGiphy;
+  img.src = image;
   img.alt = "Error Giphy"
   const divMessage = document.createElement('div');
   divMessage.className = "message"; //
@@ -70,26 +73,26 @@ async function getData(url) {
     const response = await fetch(url);
     const data = await response.json();
     // console.log(data);
+    offSet++;
+    console.log(offSet);
     return data;
   } catch (error) {
     console.error(error);
-    errorMessage('Oops... somenting went wrong.');
+    errorMessage('Oops... somenting went wrong.', errorFetch);
   }
 }
 
 const loadData = async(url) => {
   const data = await getData(url);
   getImage(data);
-  offSet++;
-  console.log(offSet);
 }
 
 const getSearchData = async(string) => {
-  const urlSearch = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=6&offset=${offSet}&rating=g&lang=en`;
+  const urlSearch = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=${limit}&offset=${offSet}&rating=g&lang=en`;
   const dataSearch = await getData(urlSearch);
   // console.log(dataSearch);
   if (!dataSearch.data.length) {
-    errorMessage('Not found. Please enter a valid word again.')
+    errorMessage('Not found. Please enter a valid word again.', errorGiphy)
   } else {
     getHistory(string, dataSearch);
     getImage(dataSearch);
@@ -98,7 +101,7 @@ const getSearchData = async(string) => {
 
 const search = () => {
   let value = input.value;
-  (!value) ? errorMessage('Please enter a valid word.') : getSearchData(value);
+  (!value) ? errorMessage('Please enter a valid word.', errorGiphy) : getSearchData(value);
   input.value = '';
 }
 
@@ -142,18 +145,18 @@ const deleteHistory = (index) => {
   localStorage.setItem('Giphys', JSON.stringify(listHistory));
   showHistory();
   removeClassName();
-}
+};
 
 const removeClassName = () => {
   if ( !JSON.parse(localStorage.getItem('Giphys')) || !JSON.parse(localStorage.getItem('Giphys')).length ) {
     history.classList.remove('history');
     h2.innerHTML = "";
-  }
-}
+  };
+};
 
 const addClassName = () => {
   history.classList.add('history');
-}
+};
 
 window.addEventListener('load', () => {
   loadData(urlTrending);
@@ -164,7 +167,7 @@ window.addEventListener('load', () => {
   removeClassName();
 });
 
-input.addEventListener('keypress', (e) => {
+btnSearch.addEventListener('keypress', (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
     cleanData();
@@ -172,8 +175,15 @@ input.addEventListener('keypress', (e) => {
   }
 });
 
+btnSearch.addEventListener('click', (e) => {
+  e.preventDefault();
+  cleanData();
+  search();
+});
+
 window.addEventListener("scroll", async () => {
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-    await loadData(urlTrending);
+    // await loadData(urlTrending); 
+    await getData();
   }
 });

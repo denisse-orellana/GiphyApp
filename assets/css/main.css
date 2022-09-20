@@ -48,37 +48,64 @@ main {
 
 #section__form {
   display: flex; 
-  vertical-align: middle;
   justify-content: center;
+  vertical-align: middle;
   padding: 1rem 2rem 0rem 2rem;
+  animation: fadeIn 2s ease 1 forwards;
 }
 
 #section__form form input {
-  width: 100%;
-  padding: 1.2rem;
+  padding: 1.15rem;
   border: 1px solid var(--dark);
   border-radius: .5rem;
 }
 
 #section__form input::placeholder {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 300;
   color: var(--light-gray);
 }
 
-#section__form button {
+#section__form .btn-search {
+  margin-left: 0rem;
+  padding: 0.9rem;
+  background-color: var(--white);
+  color: var(--dark);
+  border: 1px solid var(--dark);
+  border-radius: .5rem;
+  vertical-align: bottom;
+  cursor: pointer;
+}
+
+#section__form .btn-search i {
+  font-size: 2rem;
+}
+
+#section__form .btn-search:hover {
+  transition: all .5s;
+  background-color: var(--blue);
+  color: var(--white);
+  border: 1px solid var(--white);
+}
+
+#section__form .btn-search:hover i {
+  color: var(--white);
+}
+
+#section__form .btn-login {
+  margin-left: 1rem;
   background-color: var(--blue);
   color: var(--white);
   font-size: 1.8rem;
   font-weight: 400;
-  margin-left: 1.5rem;
   padding: 1.2rem;
   border: 1px solid var(--blue);
   border-radius: .5rem;
   cursor: pointer;
+  vertical-align:bottom;
 }
 
-#section__form button:hover {
+#section__form .btn-login:hover {
   transition: all .5s;
   background-color: var(--white);
   color: var(--blue);
@@ -120,10 +147,12 @@ main {
   font-weight: 300;
   margin-top: 2rem;
   padding: 2rem;
+  animation: fadeIn 2s ease 1 forwards;
 }
 
 #main__history {
   padding: 0rem 2rem 0rem 2rem;
+  animation: fadeIn 2s ease 1 forwards;
 }
 
 #history__title {
@@ -159,7 +188,18 @@ i {
   width: 200px;
   height: 200px;
   border-radius: .5rem;
-  box-shadow: 0 4px 8px 0 var(--dark-shadow);
+  /* box-shadow: 0 4px 8px 0 var(--dark-shadow); */
+}
+
+@keyframes fadeIn {
+  from{
+      transform: translateY(-20px);
+      opacity: 0;
+  }
+  to{
+      transform: translateY(0px);
+      opacity: 1;
+  }
 }
 
 @media only screen and (max-width: 600px) {
@@ -172,8 +212,9 @@ i {
   #section__form input::placeholder {
     font-size: 1.6rem;
   }
-  #section__form button {
-    padding: 1rem;
+  #section__form .btn-login {
+    margin-left: 0.1rem;
+    padding: 0.7rem;
   }
   .message  {
     font-size: 1.5rem;
