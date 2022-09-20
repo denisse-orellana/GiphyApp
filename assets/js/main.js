@@ -1,13 +1,15 @@
 const form = document.querySelector('#form');
 const input = document.querySelector('#input');
 const button = document.querySelector('#search');
-const message = document.querySelector('#error-message');
+const message = document.querySelector('#error__message');
 const history = document.querySelector('#history');
-const h2 = document.querySelector('#history-title');
+const h2 = document.querySelector('#history__title');
+let offSet = 0;
 
 const baseUrl = `https://api.giphy.com/v1/gifs`
 const apiKey = "ctrj4Sw8vwEJqQaiXS5LRX2i1ssf8pj8";
-const urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=24&rating=g`;
+const urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=6&offset=${offSet}&rating=g`;
+const errorGiphy = "https://media0.giphy.com/media/JsE9qckiYyVClQ5bY2/giphy.gif?cid=790b7611eebfc64d468ef60c14903e5f82dd73b4856f6cf8&rid=giphy.gif&ct=g";
 
 const addCard = (alt, image) => {
   // console.log(alt, image);
@@ -15,7 +17,7 @@ const addCard = (alt, image) => {
   figure.className = "card-giphy";
   const img = document.createElement("img");
   img.src = image;
-  img.alt = alt;
+  img.alt = alt; 
 
   figure.appendChild(img);
   document.querySelector('#main__section').appendChild(figure);
@@ -23,23 +25,25 @@ const addCard = (alt, image) => {
   if (!image) {
     document.querySelector('#main__section').removeChild(figure);
   }
-  if (!alt) {
-    img.alt = "Title not provided by Giphy";
-  } 
 }
 
 const getImage = async(array) => {
   for(let giphy of array.data) {
-    const alt = giphy.title;
-    const image = giphy.images.original.webp;
-    // const username = giphy.username;
-    // const avatar = giphy.user.avatar_url;
-    // console.log(image)
+    const alt = giphy.title ||= "Title not provided by Giphy";
+    const username = giphy.username ||= "Unknown User";
+    const image = giphy.images.original.webp ||= giphy.images.original.url;
+    // const avatar = giphy.user.avatar_url ?? {};
+    // console.log(username)
     addCard(alt, image);
   }
 }
 
 const errorMessage = (message) => {
+  const figure = document.createElement("figure");
+  figure.className = "card-error"
+  const img = document.createElement("img");
+  img.src = errorGiphy;
+  img.alt = "Error Giphy"
   const divMessage = document.createElement('div');
   divMessage.className = "message"; //
   divMessage.innerHTML = 
@@ -48,7 +52,9 @@ const errorMessage = (message) => {
   `
   ;
 
-  document.querySelector('#error-message').appendChild(divMessage);
+  figure.appendChild(img);
+  divMessage.appendChild(figure);
+  document.querySelector('#error__message').appendChild(divMessage);
   setTimeout(() => {
     divMessage.remove();
   }, 3000);
@@ -74,13 +80,15 @@ async function getData(url) {
 const loadData = async(url) => {
   const data = await getData(url);
   getImage(data);
+  offSet++;
+  console.log(offSet);
 }
 
 const getSearchData = async(string) => {
-  const urlSearch = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=24&offset=0&rating=g&lang=en`;
+  const urlSearch = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=6&offset=${offSet}&rating=g&lang=en`;
   const dataSearch = await getData(urlSearch);
-  console.log(dataSearch);
-  if (!dataSearch.data.length === 0) {
+  // console.log(dataSearch);
+  if (!dataSearch.data.length) {
     errorMessage('Not found. Please enter a valid word again.')
   } else {
     getHistory(string, dataSearch);
@@ -93,23 +101,6 @@ const search = () => {
   (!value) ? errorMessage('Please enter a valid word.') : getSearchData(value);
   input.value = '';
 }
-
-window.addEventListener('load', () => {
-  loadData(urlTrending);
-  if (JSON.parse(localStorage.getItem('Giphys')) != null ) {
-    showHistory();
-    addClassName();
-  } 
-  removeClassName();
-});
-
-input.addEventListener('keypress', (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    cleanData();
-    search();
-  }
-});
 
 const getHistory = (string, obj) => {
   let listHistory = JSON.parse(localStorage.getItem('Giphys')) || [];
@@ -154,7 +145,7 @@ const deleteHistory = (index) => {
 }
 
 const removeClassName = () => {
-  if (!JSON.parse(localStorage.getItem('Giphys')).length) {
+  if ( !JSON.parse(localStorage.getItem('Giphys')) || !JSON.parse(localStorage.getItem('Giphys')).length ) {
     history.classList.remove('history');
     h2.innerHTML = "";
   }
@@ -164,8 +155,25 @@ const addClassName = () => {
   history.classList.add('history');
 }
 
-/*
-local storage (3 busquedas)
-infinite scrolling
-local storage cuota 22 
-*/ 
+window.addEventListener('load', () => {
+  loadData(urlTrending);
+  if (JSON.parse(localStorage.getItem('Giphys')) != null ) {
+    showHistory();
+    addClassName();
+  } 
+  removeClassName();
+});
+
+input.addEventListener('keypress', (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    cleanData();
+    search();
+  }
+});
+
+window.addEventListener("scroll", async () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+    await loadData(urlTrending);
+  }
+});
