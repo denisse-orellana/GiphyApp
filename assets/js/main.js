@@ -73,7 +73,7 @@ async function getData(url) {
     const response = await fetch(url);
     const data = await response.json();
     // console.log(data);
-    offSet++;
+    offSet += limit + 1;
     console.log(offSet);
     return data;
   } catch (error) {
@@ -118,15 +118,14 @@ const getHistory = (string, obj) => {
 
 const showHistory = () => {
   let listHistory = JSON.parse(localStorage.getItem('Giphys'));
-  // let lastSearch = listHistory.reverse().slice(0, 3);
-  // console.log(lastSearch)
-  // let lastSearch = listHistory.slice(-3);
+  let lastSearch = listHistory.slice(-3).reverse();
 
   h2.innerHTML = 'Recent Searches';
   addClassName();
 
   let list = '';
-  listHistory.forEach((e, index) => {
+  lastSearch.forEach((e) => {
+    let index = listHistory.indexOf(e);
     list += `<div><span onclick="searchHistory(${index})">${e[0].toLowerCase()}</span>&nbsp;<span onclick="deleteHistory(${index})"><i class="fa-solid fa-x"></i></span></div>`;
   });
   history.innerHTML = list;
