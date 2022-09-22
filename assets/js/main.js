@@ -5,17 +5,18 @@ const btnSearch = document.querySelector("#btn-search");
 const message = document.querySelector('#error__message');
 const history = document.querySelector('#history');
 const h2 = document.querySelector('#history__title');
-let limit = 6;
+
+let limit = 12;
 let offSet = 0;
 
 const baseUrl = `https://api.giphy.com/v1/gifs`
 const apiKey = "ctrj4Sw8vwEJqQaiXS5LRX2i1ssf8pj8";
-const urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
+let urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
 const errorGiphy = "https://media0.giphy.com/media/JsE9qckiYyVClQ5bY2/giphy.gif?cid=790b7611eebfc64d468ef60c14903e5f82dd73b4856f6cf8&rid=giphy.gif&ct=g";
 const errorFetch = "./assets/images/server_error_500.svg"
+const userAvatar = "./assets/images/avatar.png"
 
-const addCard = (alt, image) => {
-  // console.log(alt, image);
+const addCard = (alt, image, username, avatar) => {
   const figure = document.createElement("figure");
   figure.className = "card-giphy";
   const img = document.createElement("img");
@@ -28,16 +29,32 @@ const addCard = (alt, image) => {
   if (!image) {
     document.querySelector('#main__section').removeChild(figure);
   }
+
+  const divUser = document.createElement("div");
+  divUser.className = "card-user";
+  const figureUser = document.createElement("figure");
+  figureUser.className = "card-avatar";
+  const imgUser = document.createElement("img");
+  imgUser.src = avatar;
+  imgUser.alt = 'Avatar User'; 
+  const p = document.createElement("p");
+  p.innerHTML = `@${username}`;
+
+  figureUser.appendChild(imgUser);
+  divUser.appendChild(figureUser);
+  divUser.appendChild(p);
+  figure.appendChild(divUser);
+  
 }
 
 const getImage = async(array) => {
   for(let giphy of array.data) {
     const alt = giphy.title ||= "Title not provided by Giphy";
-    const username = giphy.username ||= "Unknown User";
     const image = giphy.images.original.webp ||= giphy.images.original.url;
-    // const avatar = giphy.user.avatar_url ?? {};
-    // console.log(username)
-    addCard(alt, image);
+    let avatar = '';
+    (image && !giphy.user) ? (avatar = userAvatar) : (avatar = giphy.user.avatar_url)
+    const username = giphy.username ||= "UnknownUser";
+    addCard(alt, image, username, avatar);
   }
 }
 
@@ -71,10 +88,11 @@ const cleanData = () => {
 async function getData(url) {
   try {
     const response = await fetch(url);
+    if (response.status != 200) {
+      errorMessage(`${response.status}: Oops... somenting went wrong.`, errorFetch);
+    }
     const data = await response.json();
     // console.log(data);
-    offSet += limit + 1;
-    console.log(offSet);
     return data;
   } catch (error) {
     console.error(error);
@@ -120,7 +138,7 @@ const showHistory = () => {
   let listHistory = JSON.parse(localStorage.getItem('Giphys'));
   let lastSearch = listHistory.slice(-3).reverse();
 
-  h2.innerHTML = 'Recent Searches';
+  h2.innerHTML = 'Recent History';
   addClassName();
 
   let list = '';
@@ -180,9 +198,15 @@ btnSearch.addEventListener('click', (e) => {
   search();
 });
 
-window.addEventListener("scroll", async () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-    // await loadData(urlTrending); 
-    await getData();
+const loadMore = async() => {
+  if (window.innerHeight + window.scrollY > document.body.offsetHeight) {
+    offSet += limit + 1;
+    urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
+    await getData(urlTrending);
   }
+}
+
+window.addEventListener("scroll", (e) => {
+  e.preventDefault();
+  loadMore();
 });
