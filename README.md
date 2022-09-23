@@ -1,8 +1,10 @@
 # Giphy App
 
+Project to find gifs with Giphy API's help.
+
 ## Webpage
 
-[See the App](https://denisseee.github.io/GiphyApp/)
+The project can be seen here: [GiphyApp](https://denisseee.github.io/GiphyApp/)
 
 ## Preview
 
