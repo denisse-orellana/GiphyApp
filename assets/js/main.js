@@ -97,8 +97,8 @@ async function getData(url) {
       errorMessage(`${response.status}: Oops... somenthing went wrong. Please try again.`, errorFetch);
     }
     const data = await response.json();
-    console.log(url)
-    console.log(limit, offSet)
+    // console.log(url)
+    // console.log(limit, offSet)
     // console.log(data);
     return data;
   } catch (error) {
@@ -187,9 +187,7 @@ const addClassName = () => {
 };
 
 window.addEventListener('load', () => {
-  if (!searchQuery) {
-    loadData(urlTrending);
-  }
+  loadData(urlTrending);
   if (JSON.parse(localStorage.getItem('Giphys')) != null ) {
     showHistory();
     addClassName();
