@@ -6,15 +6,17 @@ const message = document.querySelector('#error__message');
 const history = document.querySelector('#history');
 const h2 = document.querySelector('#history__title');
 
-let limit = 12;
+let limit = 9;
 let offSet = 0;
+let searchQuery = false;
 
 const baseUrl = `https://api.giphy.com/v1/gifs`
 const apiKey = "ctrj4Sw8vwEJqQaiXS5LRX2i1ssf8pj8";
-let urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
+const urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
 const errorGiphy = "https://media0.giphy.com/media/JsE9qckiYyVClQ5bY2/giphy.gif?cid=790b7611eebfc64d468ef60c14903e5f82dd73b4856f6cf8&rid=giphy.gif&ct=g";
 const errorFetch = "./assets/images/server_error_500.svg"
 const userAvatar = "./assets/images/avatar.png"
+let url = '';
 
 const addCard = (alt, image, username, avatar) => {
   const figure = document.createElement("figure");
@@ -88,26 +90,34 @@ const cleanData = () => {
 async function getData(url) {
   try {
     const response = await fetch(url);
+    if (response.status === 404) {
+      errorMessage(`${response.status}: Not Found. Please try again.`, errorFetch);
+    }
     if (response.status != 200) {
-      errorMessage(`${response.status}: Oops... somenting went wrong.`, errorFetch);
+      errorMessage(`${response.status}: Oops... somenthing went wrong. Please try again.`, errorFetch);
     }
     const data = await response.json();
+    console.log(url)
+    console.log(limit, offSet)
     // console.log(data);
     return data;
   } catch (error) {
     console.error(error);
-    errorMessage('Oops... somenting went wrong.', errorFetch);
+    errorMessage('Oops... somenthing went wrong.', errorFetch);
   }
 }
 
 const loadData = async(url) => {
   const data = await getData(url);
+  searchQuery = false;
   getImage(data);
 }
 
 const getSearchData = async(string) => {
-  const urlSearch = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=${limit}&offset=${offSet}&rating=g&lang=en`;
+  let urlSearch = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=${limit}&offset=${offSet}&rating=g&lang=en`;
   const dataSearch = await getData(urlSearch);
+  searchQuery = true;
+  console.log(searchQuery)
   // console.log(dataSearch);
   if (!dataSearch.data.length) {
     errorMessage('Not found. Please enter a valid word again.', errorGiphy)
@@ -154,6 +164,7 @@ const searchHistory = (index) => {
   let listHistory = JSON.parse(localStorage.getItem('Giphys'));
   element = listHistory[index];
   getImage(element[1]);
+  searchQuery = true;
 }
 
 const deleteHistory = (index) => {
@@ -176,7 +187,9 @@ const addClassName = () => {
 };
 
 window.addEventListener('load', () => {
-  loadData(urlTrending);
+  if (!searchQuery) {
+    loadData(urlTrending);
+  }
   if (JSON.parse(localStorage.getItem('Giphys')) != null ) {
     showHistory();
     addClassName();
@@ -199,14 +212,26 @@ btnSearch.addEventListener('click', (e) => {
 });
 
 const loadMore = async() => {
-  if (window.innerHeight + window.scrollY > document.body.offsetHeight) {
-    offSet += limit + 1;
-    urlTrending = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
-    await getData(urlTrending);
+  let pageHeight = Math.max(document.body.scrollHeight, document.body.offsetHeight,  document.documentElement.clientHeight,  document.documentElement.scrollHeight,  document.documentElement.offsetHeight );
+  ((window.innerHeight + window.scrollY) >= pageHeight) ? console.log("You are at the bottom of the page.") : console.log("Nop. Not the bottom of the page.")
+
+  if ((window.innerHeight + window.scrollY) >= pageHeight) {
+
+    if (!searchQuery) {
+      offSet += limit + 1;
+      url = `${baseUrl}/trending?api_key=${apiKey}&limit=${limit}&offset=${offSet}&rating=g`;
+      await loadData(url);
+    }
+
+    if (searchQuery) {
+      offSet += limit + 1;
+      lasthistory = JSON.parse(localStorage.getItem('Giphys'));
+      string = history[history.length - 1];
+      url = `${baseUrl}/search?api_key=${apiKey}&q=${string}&limit=${limit}&offset=${offSet}&rating=g&lang=en`;
+      await getSearchData(url);
+      searchQuery = true;
+    }
   }
 }
 
-window.addEventListener("scroll", (e) => {
-  e.preventDefault();
-  loadMore();
-});
+window.addEventListener("scroll", loadMore);
